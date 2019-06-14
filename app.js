@@ -6,6 +6,7 @@ const https = require('https');
 const puppeteer = require('puppeteer-core');
 const dotenv = require('dotenv').config();
 const cmd = require('node-command-line');
+const os = require('os');
 
 var environment_data = {
   login_username:process.env.LOGIN_USERNAME,
@@ -15,7 +16,14 @@ var environment_data = {
 }
 
 async function processHandler() {
-  await startProcess()
+  try {
+    await startProcess()
+  } catch (e) {
+    console.log('error');
+    console.log(e);
+  } finally {
+    
+  }
 }
 
 async function startProcess() {
@@ -92,12 +100,24 @@ async function startProcess() {
     return resetButton;
   });
   console.log('reset clicked');
-  await page.waitFor(60000 * 6); //minutes
-  cmd.run(`nmcli -p con up id "${environment_data.wifi_ssid}"`);
+  await page.waitFor(60000 * 1.5); //minutes
+  await connectoToWifi();
   await page.waitFor(20000);
   await browser.close();
   processHandler();
 };
+
+async function connectoToWifi() {
+  var currentOS = os.platform();
+  console.log({currentOS});
+  if (currentOS === 'linux') {
+    return cmd.run(`nmcli -p con up id "${environment_data.wifi_ssid}"`);
+  }else if (currentOS === 'win32') {
+    //windows code
+  } else {
+    reject('Sistema operativo no soportado')
+  }
+}
 
 http.listen(port,function (err) {
   if (err) return console.log(err);
