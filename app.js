@@ -26,7 +26,14 @@ async function processHandler() {
   }
 }
 
+function logCurrentTime() {
+  var date = new Date()
+  var time = date.getHours() +':'+ date.getMinutes() +':' + date.getSeconds()
+  console.log(time);
+}
+
 async function startProcess() {
+  logCurrentTime();
   const browser = await puppeteer.launch({
     executablePath:environment_data.chrome_path,
     headless:true,
@@ -100,9 +107,12 @@ async function startProcess() {
     return resetButton;
   });
   console.log('reset clicked');
+  logCurrentTime();
   await page.waitFor(60000 * 5); //minutes
+  logCurrentTime();
   await connectoToWifi();
   await page.waitFor(20000);
+  logCurrentTime();
   await browser.close();
   processHandler();
 };
