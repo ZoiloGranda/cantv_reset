@@ -21,7 +21,7 @@ async function processHandler() {
 async function startProcess() {
   const browser = await puppeteer.launch({
     executablePath:environment_data.chrome_path,
-    headless:false,
+    headless:true,
     slowMo:150, 
     devtools:true,
     ignoreHTTPSErrors: true
@@ -32,7 +32,8 @@ async function startProcess() {
   await page.keyboard.type(environment_data.login_username);
   await page.focus('#txt_Password');
   await page.keyboard.type(environment_data.login_password);
-  await page.click('#btnLogin')
+  await page.click('#btnLogin');
+  console.log('logged in');
   await page.waitFor("#listfrm");
   const wanClick = await page.evaluate(()=>{
     var iframe = document.querySelector("#listfrm")
@@ -42,6 +43,7 @@ async function startProcess() {
     wanButton.click();
     return wanButton;
   });
+  console.log('wan clicked');
   await page.waitFor("#contentfrm")
   const hasInternet = await page.evaluate(()=>{
     var iframe = document.querySelector("#contentfrm");
@@ -54,7 +56,10 @@ async function startProcess() {
   });
   if (hasInternet) {
     console.log('YA TIENES INTERNET');
+    await browser.close();
+    process.exit();
   } else {
+    console.log('NO TIENES INTERNET');
     const mantenimientoClick = await page.evaluate(()=>{
       var iframe = document.querySelector("#listfrm")
       var mantenimientoButton = iframe.contentDocument.querySelector("#link_Admin_3")
@@ -64,6 +69,7 @@ async function startProcess() {
       return mantenimientoButton;
     });
   }
+  console.log('mantenimiento clicked');
   const dispositivoClick = await page.evaluate(()=>{
     var iframe = document.querySelector("#listfrm")
     var dispositivoButton = iframe.contentDocument.querySelector("#link_Admin_3_1")
@@ -72,6 +78,7 @@ async function startProcess() {
     dispositivoButton.click();
     return dispositivoButton;
   });
+  console.log('dispositivo clicked');
   page.on('dialog', (dialog)=> {
     console.log('dialog detected');
     dialog.accept();
@@ -84,9 +91,11 @@ async function startProcess() {
     resetButton.click();
     return resetButton;
   });
-  await page.waitFor(80000);
-  await browser.close()
+  console.log('reset clicked');
+  await page.waitFor(60000 * 6); //minutes
   cmd.run(`nmcli -p con up id "${environment_data.wifi_ssid}"`);
+  await page.waitFor(20000);
+  await browser.close();
   processHandler();
 };
 
