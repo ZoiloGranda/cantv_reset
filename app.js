@@ -5,17 +5,16 @@ const port = 8080;
 const https = require('https');
 const puppeteer = require('puppeteer-core');
 const dotenv = require('dotenv').config();
+const cmd = require('node-command-line');
 
 var environment_data = {
   login_username:process.env.LOGIN_USERNAME,
   login_password:process.env.LOGIN_PASSWORD,
-  chrome_path:process.env.CHROME_EXECUTABLE_PATH
+  chrome_path:process.env.CHROME_EXECUTABLE_PATH,
+  wifi_ssid:process.env.WIFI_SSID
 }
 
 async function processHandler() {
-  console.log('\u0007');
-  
-  console.log('asd');
   await startProcess()
 }
 
@@ -34,10 +33,7 @@ async function startProcess() {
   await page.focus('#txt_Password');
   await page.keyboard.type(environment_data.login_password);
   await page.click('#btnLogin')
-  console.log('clicked');
-  // await page.waitFor(2000);
   await page.waitFor("#listfrm");
-  console.log('awaited');
   const wanClick = await page.evaluate(()=>{
     var iframe = document.querySelector("#listfrm")
     var wanButton = iframe.contentDocument.querySelector("#link_Admin_0_1")
@@ -47,9 +43,7 @@ async function startProcess() {
     return wanButton;
   });
   await page.waitFor("#contentfrm")
-  console.log('klk');
   const hasInternet = await page.evaluate(()=>{
-    console.log('espra');
     var iframe = document.querySelector("#contentfrm");
     console.log(iframe);
     var textElement = iframe.contentDocument.querySelector("#Estado\\ de\\ la\\ conexión > table > tbody > tr:nth-child(4) > td:nth-child(2)").textContent
@@ -58,7 +52,6 @@ async function startProcess() {
     console.log({conectadoCheck});
     return conectadoCheck;
   });
-  console.log('me sali');
   if (hasInternet) {
     console.log('YA TIENES INTERNET');
   } else {
@@ -91,6 +84,10 @@ async function startProcess() {
     resetButton.click();
     return resetButton;
   });
+  await page.waitFor(80000);
+  await browser.close()
+  cmd.run(`nmcli -p con up id "${environment_data.wifi_ssid}"`);
+  processHandler();
 };
 
 http.listen(port,function (err) {
