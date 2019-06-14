@@ -100,7 +100,7 @@ async function startProcess() {
     return resetButton;
   });
   console.log('reset clicked');
-  await page.waitFor(60000 * 1.5); //minutes
+  await page.waitFor(60000 * 5); //minutes
   await connectoToWifi();
   await page.waitFor(20000);
   await browser.close();
