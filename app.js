@@ -124,7 +124,6 @@ async function startProcess() {
   await page.waitFor(20000);
   logCurrentTime();
   await browser.close();
-  processHandler();
 };
 
 async function connectoToWifi() {
