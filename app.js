@@ -16,24 +16,23 @@ var environment_data = {
 }
 
 async function processHandler() {
-  try {
-    await startProcess()
-  } catch (e) {
-    if (e.message === 'net::ERR_CONNECTION_TIMED_OUT at https://192.168.1.1') {
-      console.log('connection error');
-      await connectoToWifi();
-      processHandler();
-    }if (e.message.includes('textContent')) {
-      console.log('textContent element error');
-      await connectoToWifi();
-      processHandler();
-    }
-    console.log('error');
-    console.log('e.message:',e.message);
-    console.log(e);
-  } finally {
-    
-  }
+  var weHaveInternet = false;
+  do {
+    try {
+      await startProcess()
+    } catch (e) {
+      console.log('error');
+      console.log('e.message:',e.message);
+      console.log(e);
+      if (e.message === 'net::ERR_CONNECTION_TIMED_OUT at https://192.168.1.1') {
+        console.log('connection error');
+        await connectoToWifi();
+      }if (e.message.includes('textContent')) {
+        console.log('textContent element error');
+        await connectoToWifi();
+      }
+    } 
+  } while (!weHaveInternet);
 }
 
 function logCurrentTime() {
