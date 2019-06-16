@@ -20,12 +20,16 @@ async function processHandler() {
     await startProcess()
   } catch (e) {
     if (e.message === 'net::ERR_CONNECTION_TIMED_OUT at https://192.168.1.1') {
-      console.log('catcheado');
+      console.log('connection error');
+      await connectoToWifi();
+      processHandler();
+    }if (e.message.includes('textContent')) {
+      console.log('textContent element error');
       await connectoToWifi();
       processHandler();
     }
     console.log('error');
-    console.log(e.message);
+    console.log('e.message:',e.message);
     console.log(e);
   } finally {
     
