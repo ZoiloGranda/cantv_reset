@@ -19,7 +19,13 @@ async function processHandler() {
   try {
     await startProcess()
   } catch (e) {
+    if (e.message === 'net::ERR_CONNECTION_TIMED_OUT at https://192.168.1.1') {
+      console.log('catcheado');
+      await connectoToWifi();
+      processHandler();
+    }
     console.log('error');
+    console.log(e.message);
     console.log(e);
   } finally {
     
@@ -42,6 +48,7 @@ async function startProcess() {
     ignoreHTTPSErrors: true
   });
   const page = await browser.newPage()
+  await page.waitFor(15000)
   await page.goto('https://192.168.1.1');
   await page.focus('#txt_Username');
   await page.keyboard.type(environment_data.login_username);
