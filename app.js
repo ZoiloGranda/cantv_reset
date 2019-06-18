@@ -25,13 +25,6 @@ async function processHandler() {
       console.log('error');
       console.log('e.message:',e.message);
       console.log(e);
-      // if (e.message.includes('ERR_CONNECTION_TIMED_OUT')||e.message.includes('ERR_CONNECTION_REFUSED')) {
-      //   console.log('connection error');
-      //   await connectoToWifi();
-      // }if (e.message.includes('textContent')) {
-      //   console.log('textContent element error');
-      //   await connectoToWifi();
-      // }
     } 
   } while (!weHaveInternet);
 }
