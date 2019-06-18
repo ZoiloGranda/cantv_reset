@@ -7,14 +7,21 @@
 5. `npm start`
 
 # Windows
-To get get the wifi profile name run on terminal 
+You will need to open the cmd or terminal with **Administrator privileges**
+
+To get get the **WIFI_SSID** run on terminal 
 ```bash
 netsh wlan show profile
 ```
 Should be the same ssid and profile name 
 
+To get the **WIFI_INTERFACE_NAME** run on terminal
+```bash
+netsh wlan show networks
+```
+
 # Ubuntu/Xubuntu
-To get get the wifi ssid run on terminal 
+To get get the **WIFI_SSID** run on terminal 
 ```bash
 nmcli connection show
 ```
