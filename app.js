@@ -12,13 +12,19 @@ var environment_data = {
   login_username:process.env.LOGIN_USERNAME,
   login_password:process.env.LOGIN_PASSWORD,
   chrome_path:process.env.CHROME_EXECUTABLE_PATH,
-  wifi_ssid:process.env.WIFI_SSID
+  wifi_ssid:process.env.WIFI_SSID,
+  wifi_interface_name:process.env.WIFI_INTERFACE_NAME,
+  current_os: os.platform()
 }
 
 async function processHandler() {
   var weHaveInternet = false;
   do {
     try {
+      if (environment_data.current_os === 'win32') {
+        await disableWiFi();
+        await enableWiFi();
+      }
       await connectoToWifi();
       await startProcess()
     } catch (e) {
@@ -38,7 +44,7 @@ async function startProcess() {
     devtools:true,
     ignoreHTTPSErrors: true
   });
-  const page = await browser.newPage()
+  var page = await browser.newPage()
   var doLoginVar = await doLogin(page);
   var clickOnWANVar = await clickOnWAN(page);
   var hasInternet = await checkConectadoStatus(page);
@@ -53,9 +59,6 @@ async function startProcess() {
   var clickOnResetVar = await clickOnReset(page)
   logCurrentTime();
   await page.waitFor(60000 * 5); //minutes
-  logCurrentTime();
-  await connectoToWifi();
-  await page.waitFor(20000);
   logCurrentTime();
   await browser.close();
 };
@@ -142,12 +145,18 @@ function logCurrentTime() {
   console.log(time);
 }
 
+async function disableWiFi() {
+  return cmd.run(`netsh interface set interface name="${environment_data.wifi_interface_name}" admin=disabled`)
+}
+
+async function enableWiFi() {
+  return cmd.run(`netsh interface set interface name="${environment_data.wifi_interface_name}" admin=enabled`)
+}
+
 async function connectoToWifi() {
-  var currentOS = os.platform();
-  console.log({currentOS});
-  if (currentOS === 'linux') {
+  if (environment_data.current_os === 'linux') {
     return cmd.run(`nmcli -p con up id "${environment_data.wifi_ssid}"`);
-  }else if (currentOS === 'win32') {
+  }else if (environment_data.current_os === 'win32') {
     return cmd.run(`netsh wlan connect ssid=${environment_data.wifi_ssid} name=${environment_data.wifi_ssid}`);
   } else {
     reject('Sistema operativo no soportado')
