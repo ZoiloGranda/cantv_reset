@@ -23,7 +23,9 @@ async function processHandler() {
     try {
       if (environment_data.current_os === 'win32') {
         await disableWiFi();
+        console.log('wifi disabled');
         await enableWiFi();
+        console.log('wifi enabled');
       }
       await connectoToWifi();
       await startProcess()
