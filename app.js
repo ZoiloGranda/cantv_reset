@@ -52,7 +52,7 @@ async function startProcess() {
   var hasInternet = await checkConectadoStatus(page);
   console.log('Tienes internet: ',hasInternet);
   if (hasInternet) {
-    console.log('YA TIENES INTERNET');
+    console.log('\x1b[32m','YA TIENES INTERNET');
     await browser.close();
     process.exit();
   }
