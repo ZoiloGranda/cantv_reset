@@ -15,7 +15,7 @@ var environment_data = {
   wifi_ssid:process.env.WIFI_SSID,
   wifi_interface_name:process.env.WIFI_INTERFACE_NAME,
   current_os: os.platform()
-}
+};
 
 async function processHandler() {
   var weHaveInternet = false;
@@ -35,33 +35,28 @@ async function processHandler() {
       console.log(e);
     } 
   } while (!weHaveInternet);
-}
+};
 
 async function startProcess() {
   logCurrentTime();
   const browser = await puppeteer.launch({
     executablePath:environment_data.chrome_path,
     headless:true,
-    slowMo:150, 
+    slowMo:200, 
     devtools:true,
     ignoreHTTPSErrors: true
   });
   var page = await browser.newPage()
-  var doLoginVar = await doLogin(page);
-  var clickOnWANVar = await clickOnWAN(page);
+  await doLogin(page);
+  await clickOnWAN(page);
   var hasInternet = await checkConectadoStatus(page);
-  console.log('Tienes internet: ',hasInternet);
-  if (hasInternet) {
-    console.log('\x1b[32m','YA TIENES INTERNET');
-    await browser.close();
-    process.exit();
-  }
-  var clickOnMantenimientoVar = await clickOnMantenimiento(page);
-  var clickOnDispositivoVar = await clickOnDispositivo(page)
-  var clickOnResetVar = await clickOnReset(page)
-  logCurrentTime();
+  await disconnectOnInternet(hasInternet);
+  await clickOnMantenimiento(page);
+  await clickOnDispositivo(page)
+  await clickOnReset(page)
+  await logCurrentTime();
   await page.waitFor(60000 * 5); //minutes
-  logCurrentTime();
+  await logCurrentTime();
   await browser.close();
 };
 
@@ -75,7 +70,7 @@ async function doLogin(page){
   await page.click('#btnLogin');
   console.log('logged in');
   return true;
-}
+};
 
 async function clickOnWAN(page) {
   await page.waitFor("#listfrm");
@@ -88,18 +83,29 @@ async function clickOnWAN(page) {
     wanButton.click();
     return true;
   });
-}
+};
 
 async function checkConectadoStatus(page) {
   await page.waitFor("#contentfrm");
-  return await page.evaluate(()=>{
+  var hasInternet = await page.evaluate(()=>{
     var iframe = document.querySelector("#contentfrm");
     console.log(iframe);
     var textElement = iframe.contentDocument.querySelector("#Estado\\ de\\ la\\ conexión > table > tbody > tr:nth-child(4) > td:nth-child(2)").textContent
     var conectadoCheck = textElement ==="Conectado "? true : false;
     return conectadoCheck;
   });
-}
+
+};
+
+async function disconnectOnInternet(hasInternet) {
+  if (hasInternet) {
+    console.log('Tienes internet: ',hasInternet);
+    console.log('\x1b[32m','YA TIENES INTERNET');
+    await browser.close();
+    process.exit();
+  }
+  return
+};
 
 async function clickOnMantenimiento(page) {
   console.log('NO TIENES INTERNET');
@@ -112,7 +118,7 @@ async function clickOnMantenimiento(page) {
     mantenimientoButton.click();
     return true;
   });
-}
+};
 
 async function clickOnDispositivo(page){
   console.log('dispositivo clicking');
@@ -124,7 +130,8 @@ async function clickOnDispositivo(page){
     dispositivoButton.click();
     return true;
   });
-}
+};
+
 async function clickOnReset(page){
   console.log('reset clicking');
   page.on('dialog', (dialog)=> {
@@ -139,21 +146,22 @@ async function clickOnReset(page){
     resetButton.click();
     return true;
   });
-}
+};
 
-function logCurrentTime() {
+async function logCurrentTime() {
   var date = new Date()
   var time = date.getHours() +':'+ date.getMinutes() +':' + date.getSeconds()
   console.log(time);
-}
+  return
+};
 
 async function disableWiFi() {
   return cmd.run(`netsh interface set interface name="${environment_data.wifi_interface_name}" admin=disabled`)
-}
+};
 
 async function enableWiFi() {
   return cmd.run(`netsh interface set interface name="${environment_data.wifi_interface_name}" admin=enabled`)
-}
+};
 
 async function connectoToWifi() {
   if (environment_data.current_os === 'linux') {
@@ -163,10 +171,10 @@ async function connectoToWifi() {
   } else {
     reject('Sistema operativo no soportado')
   }
-}
+};
 
 http.listen(port,function (err) {
   if (err) return console.log(err);
   console.log(`Server corriendo en el puerto ${port}`);
   processHandler();
-})
+});
