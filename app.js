@@ -50,7 +50,7 @@ async function startProcess() {
   await doLogin(page);
   await clickOnWAN(page);
   var hasInternet = await checkConectadoStatus(page);
-  await disconnectOnInternet(hasInternet);
+  await disconnectOnInternet(hasInternet, browser);
   await clickOnMantenimiento(page);
   await clickOnDispositivo(page)
   await clickOnReset(page)
@@ -87,17 +87,16 @@ async function clickOnWAN(page) {
 
 async function checkConectadoStatus(page) {
   await page.waitFor("#contentfrm");
-  var hasInternet = await page.evaluate(()=>{
+  return await page.evaluate(()=>{
     var iframe = document.querySelector("#contentfrm");
     console.log(iframe);
     var textElement = iframe.contentDocument.querySelector("#Estado\\ de\\ la\\ conexión > table > tbody > tr:nth-child(4) > td:nth-child(2)").textContent
     var conectadoCheck = textElement ==="Conectado "? true : false;
     return conectadoCheck;
   });
-
 };
 
-async function disconnectOnInternet(hasInternet) {
+async function disconnectOnInternet(hasInternet, browser) {
   if (hasInternet) {
     console.log('Tienes internet: ',hasInternet);
     console.log('\x1b[32m','YA TIENES INTERNET');
